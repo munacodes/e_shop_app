@@ -1,12 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EcommerceApp {
   static const String appName = 'e-Shop';
 
   static SharedPreferences? sharedPreferences;
-  // static FirebaseUser user;
-  // static FirebaseAuth auth;
-  // static Firestore firestore;
+  static FirebaseStorage? user;
+  static FirebaseAuth? auth;
+  static FirebaseFirestore? firestore;
 
   static String collectionUser = "users";
   static String collectionOrders = "orders";

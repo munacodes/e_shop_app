@@ -14,7 +14,11 @@ class ErrorAlertDialog extends StatelessWidget {
           onPressed: () {
             Navigator.pop(context);
           },
-          //  color: Colors.red,
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(
+              Colors.red,
+            ),
+          ),
           child: Center(
             child: Text("OK"),
           ),

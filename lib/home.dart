@@ -1,29 +1,75 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_shop_app/Counters/countersExports.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'Authentication/authenticationExports.dart';
+import 'package:e_shop_app/Authentication/authentication.dart';
 import 'package:e_shop_app/Config/config.dart';
-import 'Counters/countersExports.dart';
-import 'Store/storeExports.dart';
+import 'package:e_shop_app/Store/storeExports.dart';
+import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
+  void initState() {
+    super.initState();
+
+    displaySplash();
+  }
+
+  displaySplash() {
+    Timer(
+      const Duration(seconds: 5),
+      () async {
+        if (EcommerceApp.auth!.currentUser != null) {
+          Route route = MaterialPageRoute(
+            builder: (_) => StoreHome(),
+          );
+          Navigator.pushReplacement(context, route);
+        } else {
+          Route route = MaterialPageRoute(
+            builder: (_) => const AuthenticScreen(),
+          );
+          Navigator.pushReplacement(context, route);
+        }
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Material(
-      child: Center(
-        child: Text(
-          "Welcome to Flutter Firetore eCommerce Course by Coding Cafe.",
-          style: TextStyle(color: Colors.green, fontSize: 20.0),
-          textAlign: TextAlign.center,
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.pink,
+              Colors.lightGreenAccent,
+            ],
+            begin: FractionalOffset(0.0, 0.0),
+            end: FractionalOffset(1.0, 0.0),
+            stops: [0.0, 1.0],
+            tileMode: TileMode.clamp,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Image(
+                image: AssetImage('assets/images/welcome.png'),
+              ),
+              SizedBox(
+                height: 20.0,
+              ),
+              Text(
+                'World\'s Largest & Number One Shop',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
         ),
       ),
     );

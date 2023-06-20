@@ -7,13 +7,15 @@ import '../Store/storeExports.dart';
 import 'package:e_shop_app/Config/config.dart';
 
 class Login extends StatefulWidget {
+  const Login({super.key});
+
   @override
-  _LoginState createState() => _LoginState();
+  State<Login> createState() => _LoginState();
 }
 
 class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
-    return Text("");
+    return Text('');
   }
 }
