@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_shop_app/Widgets/widgetsExports.dart';
 import 'package:e_shop_app/DialogBox/dialogBoxExports.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -43,7 +45,7 @@ class _RegisterState extends State<Register> {
               height: 10.0,
             ),
             InkWell(
-              onTap: _selectAndClickImage,
+              onTap: _selectAndPickImage,
               child: CircleAvatar(
                 radius: _screenWidth = 60.0,
                 backgroundColor: Colors.white,
@@ -128,9 +130,9 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  Future<void> _selectAndClickImage() async {
-    _imageFile =
-        await ImagePicker.pickImage(source: ImageSource.gallery) as File?;
+  Future<void> _selectAndPickImage() async {
+    final _imageFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
   }
 
   Future<void> uploadAndSaveImage() async {
@@ -141,19 +143,92 @@ class _RegisterState extends State<Register> {
           return const ErrorAlertDialog(message: 'Please Select an Image');
         },
       );
+    } else {
+      _passwordTextEditingController.text ==
+              _cPasswordTextEditingController.text
+          ? _emailTextEditingController.text.isNotEmpty &&
+                  _passwordTextEditingController.text.isNotEmpty &&
+                  _cPasswordTextEditingController.text.isNotEmpty &&
+                  _nameTextEditingController.text.isNotEmpty
+              ? uploadToStorage()
+              : displayDialog('Please fill up the Registration Complete form')
+          : displayDialog('Password do not match');
     }
   }
 
-  FirebaseStorage storage = FirebaseStorage.instance;
-  File? _pickedImage;
-  // PickedFile? _image;
-  Future<void> _getImage({required ImageSource source}) async {
-    final picker = ImagePicker();
-    final _image = await picker.pickImage(source: source);
-    if (_image != null) {
-      setState(() {
-        _pickedImage = File(_image.path);
+  displayDialog(String msg) {
+    showDialog(
+      context: context,
+      builder: (c) {
+        return ErrorAlertDialog(message: msg);
+      },
+    );
+  }
+
+  uploadToStorage() async {
+    showDialog(
+      context: context,
+      builder: (c) {
+        return const LoadingAlertDialog(
+          message: 'Authenticating, Please wait....',
+        );
+      },
+    );
+    String imageFileName = DateTime.now().millisecondsSinceEpoch.toString();
+    Reference storageReference =
+        FirebaseStorage.instance.ref().child(imageFileName);
+    UploadTask storageUploadTask = storageReference.putFile(_imageFile!);
+    TaskSnapshot taskSnapshot = await storageUploadTask;
+    await taskSnapshot.ref.getDownloadURL().then((urlImage) {
+      userImageUrl = urlImage;
+
+      _registerUser();
+    });
+  }
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  void _registerUser() async {
+    User? user;
+    await _auth
+        .createUserWithEmailAndPassword(
+      email: _emailTextEditingController.text.trim(),
+      password: _passwordTextEditingController.text.trim(),
+    )
+        .then((auth) {
+      user = auth.user!;
+    }).catchError((error) {
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (contex) {
+          return ErrorAlertDialog(message: error.message.toString());
+        },
+      );
+    });
+    if (user != null) {
+      saveUserInfoToFireStore(user!).then((value) {
+        Navigator.pop(context);
+        Route route = MaterialPageRoute(builder: (context) => StoreHome());
+        Navigator.pushReplacement(context, route);
       });
     }
+  }
+
+  Future saveUserInfoToFireStore(User user) async {
+    FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
+      'uid': user.uid,
+      'email': user.email,
+      'name': _nameTextEditingController.text.trim(),
+      'url': userImageUrl,
+    });
+    await EcommerceApp.sharedPreferences!.setString('uid', user.uid);
+    await EcommerceApp.sharedPreferences!
+        .setString(EcommerceApp.userEmail, user.email!);
+    await EcommerceApp.sharedPreferences!.setString(
+        EcommerceApp.userName, _nameTextEditingController.text.trim());
+    await EcommerceApp.sharedPreferences!
+        .setString(EcommerceApp.userAvatarUrl, userImageUrl!);
+    await EcommerceApp.sharedPreferences!
+        .setStringList(EcommerceApp.userCartList, ['garbageValue']);
   }
 }
