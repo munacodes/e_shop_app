@@ -30,7 +30,6 @@ class _RegisterState extends State<Register> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? userImageUrl = '';
-  File? _imageFile;
 
   @override
   Widget build(BuildContext context) {
@@ -130,9 +129,13 @@ class _RegisterState extends State<Register> {
     );
   }
 
+  File? _imageFile;
   Future<void> _selectAndPickImage() async {
-    final _imageFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _imageFile = File(image!.path);
+    });
   }
 
   Future<void> uploadAndSaveImage() async {
@@ -170,7 +173,7 @@ class _RegisterState extends State<Register> {
       context: context,
       builder: (c) {
         return const LoadingAlertDialog(
-          message: 'Authenticating, Please wait....',
+          message: 'Registering, Please wait....',
         );
       },
     );
@@ -188,7 +191,7 @@ class _RegisterState extends State<Register> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   void _registerUser() async {
-    User? user;
+    User? user = FirebaseAuth.instance.currentUser;
     await _auth
         .createUserWithEmailAndPassword(
       email: _emailTextEditingController.text.trim(),
@@ -220,6 +223,7 @@ class _RegisterState extends State<Register> {
       'email': user.email,
       'name': _nameTextEditingController.text.trim(),
       'url': userImageUrl,
+      EcommerceApp.userCartList: ["garbageValue"],
     });
     await EcommerceApp.sharedPreferences!.setString('uid', user.uid);
     await EcommerceApp.sharedPreferences!
