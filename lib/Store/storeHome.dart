@@ -68,22 +68,24 @@ class _StoreHomeState extends State<StoreHome> {
                       size: 20.0,
                       color: Colors.green,
                     ),
-                    // Positioned(
-                    //   top: 3.0,
-                    //   bottom: 4.0,
-                    //   child: Consumer<CartItemCounter>(
-                    //     builder: (BuildContext context, counter, _) {
-                    //       return Text(
-                    //         counter.count.toString(),
-                    //         style: const TextStyle(
-                    //           color: Colors.white,
-                    //           fontSize: 12.0,
-                    //           fontWeight: FontWeight.w500,
-                    //         ),
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
+                    Positioned(
+                      top: 4.0,
+                      bottom: 5.0,
+                      right: 7.0,
+                      left: 7.0,
+                      child: Consumer<CartItemCounter>(
+                        builder: (BuildContext context, counter, _) {
+                          return Text(
+                            counter.count.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -93,7 +95,11 @@ class _StoreHomeState extends State<StoreHome> {
       ),
       drawer: const MyDrawer(),
       body: SafeArea(
-        child: Container(),
+        child: CustomScrollView(
+          slivers: [
+            SliverPersistentHeader(pinned: true, delegate: SearchBoxDelegate()),
+          ],
+        ),
       ),
     );
   }

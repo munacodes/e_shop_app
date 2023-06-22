@@ -8,8 +8,9 @@ import '../Widgets/widgetsExports.dart';
 class SearchService {}
 
 class SearchProduct extends StatefulWidget {
+  const SearchProduct({Key? key}) : super(key: key);
   @override
-  _SearchProductState createState() => new _SearchProductState();
+  State<SearchProduct> createState() => _SearchProductState();
 }
 
 class _SearchProductState extends State<SearchProduct> {
