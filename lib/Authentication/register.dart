@@ -211,7 +211,8 @@ class _RegisterState extends State<Register> {
     if (user != null) {
       saveUserInfoToFireStore(user!).then((value) {
         Navigator.pop(context);
-        Route route = MaterialPageRoute(builder: (context) => StoreHome());
+        Route route =
+            MaterialPageRoute(builder: (context) => const StoreHome());
         Navigator.pushReplacement(context, route);
       });
     }

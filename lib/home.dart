@@ -57,14 +57,12 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Image(
-                image: AssetImage('assets/images/welcome.png'),
-              ),
-              SizedBox(
+            children: [
+              Image.asset('images/welcome.png'),
+              const SizedBox(
                 height: 20.0,
               ),
-              Text(
+              const Text(
                 'World\'s Largest & Number One Shop',
                 style: TextStyle(color: Colors.white),
               ),

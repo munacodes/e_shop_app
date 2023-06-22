@@ -35,8 +35,8 @@ class _LoginState extends State<Login> {
           children: [
             Container(
               alignment: Alignment.bottomCenter,
-              child: const Image(
-                image: AssetImage('assets/images/login.png'),
+              child: Image.asset(
+                'images/login.png',
                 height: 240.0,
                 width: 240.0,
               ),
@@ -155,7 +155,8 @@ class _LoginState extends State<Login> {
     if (user != null) {
       readData(user!).then((s) {
         Navigator.pop(context);
-        Route route = MaterialPageRoute(builder: (context) => StoreHome());
+        Route route =
+            MaterialPageRoute(builder: (context) => const StoreHome());
         Navigator.pushReplacement(context, route);
       });
     }

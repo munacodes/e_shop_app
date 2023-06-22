@@ -69,7 +69,7 @@ class _AuthenticScreenState extends State<AuthenticScreen> {
               end: Alignment.bottomLeft,
             ),
           ),
-          child: TabBarView(
+          child: const TabBarView(
             children: [
               Login(),
               Register(),
