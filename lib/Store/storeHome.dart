@@ -98,6 +98,40 @@ class _StoreHomeState extends State<StoreHome> {
         child: CustomScrollView(
           slivers: [
             SliverPersistentHeader(pinned: true, delegate: SearchBoxDelegate()),
+            StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('items')
+                  .limit(15)
+                  .orderBy('publishedDate', descending: true)
+                  .snapshots(),
+              builder: (context, dataSnapshot) {
+                return dataSnapshot.hasData
+                    ? const SliverToBoxAdapter(
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : StaggeredGrid.count(
+                        crossAxisCount: 1,
+                        mainAxisSpacing: 4.0,
+                        crossAxisSpacing: 4.0,
+                        children: [
+                          // StaggeredGridTile.fit(
+                          //   crossAxisCellCount: 1,
+                          //   child: dataSnapshot.data!.docs[Index].data(),
+                          // ),
+                          // StaggeredGridTile.fit(
+                          //   crossAxisCellCount: 1,
+                          //   child: dataSnapshot.data!.docs[Index].data(),
+                          // ),
+                          // StaggeredGridTile.fit(
+                          //   crossAxisCellCount: 1,
+                          //   child: dataSnapshot.data!.docs[Index].data(),
+                          // ),
+                        ],
+                      );
+              },
+            ),
           ],
         ),
       ),
@@ -107,7 +141,145 @@ class _StoreHomeState extends State<StoreHome> {
 
 Widget sourceInfo(ItemModel model, BuildContext context,
     {Color? background, removeCartFunction}) {
-  return InkWell();
+  return InkWell(
+    splashColor: Colors.pink,
+    child: Padding(
+      padding: const EdgeInsets.all(6.0),
+      child: Container(
+        height: 190.0,
+        width: width,
+        child: Row(
+          children: [
+            Image.network(
+              model.thumbnailUrl!,
+              width: 140.0,
+              height: 140.0,
+            ),
+            const SizedBox(width: 4.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 15.0),
+                  Container(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: Text(model.title!,
+                              style: const TextStyle(
+                                  color: Colors.black, fontSize: 14.0)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 5.0),
+                  Container(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: Text(model.shortInfo!,
+                              style: const TextStyle(
+                                  color: Colors.black54, fontSize: 12.0)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20.0),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          color: Colors.pink,
+                        ),
+                        alignment: Alignment.topLeft,
+                        width: 43.0,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Text(
+                                '50%',
+                                style: TextStyle(
+                                    fontSize: 15.0,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                              Text(
+                                'OFF',
+                                style: TextStyle(
+                                    fontSize: 12.0,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10.0),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5.0),
+                            child: Row(
+                              children: [
+                                const Text(
+                                  'Original Price: £',
+                                  style: TextStyle(
+                                      fontSize: 14.0, color: Colors.grey),
+                                ),
+                                Text(
+                                  (model.price! + model.price!).toString(),
+                                  style: const TextStyle(
+                                      fontSize: 15.0,
+                                      color: Colors.grey,
+                                      decoration: TextDecoration.lineThrough),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5.0),
+                            child: Row(
+                              children: [
+                                const Text(
+                                  'New Price: ',
+                                  style: TextStyle(
+                                      fontSize: 14.0, color: Colors.grey),
+                                ),
+                                const Text(
+                                  '£',
+                                  style: TextStyle(
+                                      color: Colors.red, fontSize: 16.0),
+                                ),
+                                Text(
+                                  (model.price!).toString(),
+                                  style: const TextStyle(
+                                      fontSize: 15.0, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Flexible(
+                    child: Container(),
+                  ),
+
+                  // TODO: Implement the cart item remove features
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 Widget card({Color primaryColor = Colors.redAccent, String? imgPath}) {
