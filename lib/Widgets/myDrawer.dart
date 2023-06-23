@@ -93,7 +93,7 @@ class MyDrawer extends StatelessWidget {
                 ),
                 ListTile(
                   leading: const Icon(
-                    Icons.home,
+                    Icons.reorder,
                     color: Colors.white,
                   ),
                   title: const Text(
@@ -113,7 +113,7 @@ class MyDrawer extends StatelessWidget {
                 ),
                 ListTile(
                   leading: const Icon(
-                    Icons.home,
+                    Icons.shopping_cart,
                     color: Colors.white,
                   ),
                   title: const Text(
@@ -133,7 +133,7 @@ class MyDrawer extends StatelessWidget {
                 ),
                 ListTile(
                   leading: const Icon(
-                    Icons.home,
+                    Icons.search,
                     color: Colors.white,
                   ),
                   title: const Text(
@@ -142,7 +142,7 @@ class MyDrawer extends StatelessWidget {
                   ),
                   onTap: () {
                     Route route = MaterialPageRoute(
-                        builder: (context) => SearchProduct());
+                        builder: (context) => const SearchProduct());
                     Navigator.pushReplacement(context, route);
                   },
                 ),
@@ -153,7 +153,7 @@ class MyDrawer extends StatelessWidget {
                 ),
                 ListTile(
                   leading: const Icon(
-                    Icons.home,
+                    Icons.add_location,
                     color: Colors.white,
                   ),
                   title: const Text(
@@ -173,7 +173,7 @@ class MyDrawer extends StatelessWidget {
                 ),
                 ListTile(
                   leading: const Icon(
-                    Icons.home,
+                    Icons.exit_to_app,
                     color: Colors.white,
                   ),
                   title: const Text(

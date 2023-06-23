@@ -111,25 +111,48 @@ class _StoreHomeState extends State<StoreHome> {
                           child: CircularProgressIndicator(),
                         ),
                       )
-                    : StaggeredGrid.count(
-                        crossAxisCount: 1,
-                        mainAxisSpacing: 4.0,
-                        crossAxisSpacing: 4.0,
-                        children: [
-                          // StaggeredGridTile.fit(
-                          //   crossAxisCellCount: 1,
-                          //   child: dataSnapshot.data!.docs[Index].data(),
-                          // ),
-                          // StaggeredGridTile.fit(
-                          //   crossAxisCellCount: 1,
-                          //   child: dataSnapshot.data!.docs[Index].data(),
-                          // ),
-                          // StaggeredGridTile.fit(
-                          //   crossAxisCellCount: 1,
-                          //   child: dataSnapshot.data!.docs[Index].data(),
-                          // ),
-                        ],
+                    :
+                    // : ListView.builder(
+                    //     itemCount: dataSnapshot.data!.docs.length,
+                    //     itemBuilder: (context, index) {
+                    //       ItemModel model = ItemModel.fromJson(
+                    //           dataSnapshot.data!.docs[index].data());
+                    //       return sourceInfo(model, context);
+                    //     },
+                    //   );
+
+                    GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 1,
+                        ),
+                        itemCount: dataSnapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          ItemModel model = ItemModel.fromJson(
+                              dataSnapshot.data!.docs[index].data());
+                          return sourceInfo(model, context);
+                        },
                       );
+
+                // : StaggeredGrid.count(
+                //     crossAxisCount: 1,
+                //     mainAxisSpacing: 4.0,
+                //     crossAxisSpacing: 4.0,
+                //     children: [
+                // StaggeredGridTile.fit(
+                //   crossAxisCellCount: 1,
+                //   child: dataSnapshot.data!.docs[Index].data(),
+                // ),
+                // StaggeredGridTile.fit(
+                //   crossAxisCellCount: 1,
+                //   child: dataSnapshot.data!.docs[Index].data(),
+                // ),
+                // StaggeredGridTile.fit(
+                //   crossAxisCellCount: 1,
+                //   child: dataSnapshot.data!.docs[Index].data(),
+                // ),
+                //   ],
+                // );
               },
             ),
           ],
@@ -142,6 +165,11 @@ class _StoreHomeState extends State<StoreHome> {
 Widget sourceInfo(ItemModel model, BuildContext context,
     {Color? background, removeCartFunction}) {
   return InkWell(
+    onTap: () {
+      Route route =
+          MaterialPageRoute(builder: (c) => ProductPage(itemModel: model));
+      Navigator.pushReplacement(context, route);
+    },
     splashColor: Colors.pink,
     child: Padding(
       padding: const EdgeInsets.all(6.0),
@@ -227,7 +255,7 @@ Widget sourceInfo(ItemModel model, BuildContext context,
                             child: Row(
                               children: [
                                 const Text(
-                                  'Original Price: £',
+                                  'Original Price: £ ',
                                   style: TextStyle(
                                       fontSize: 14.0, color: Colors.grey),
                                 ),
@@ -251,7 +279,7 @@ Widget sourceInfo(ItemModel model, BuildContext context,
                                       fontSize: 14.0, color: Colors.grey),
                                 ),
                                 const Text(
-                                  '£',
+                                  '£ ',
                                   style: TextStyle(
                                       color: Colors.red, fontSize: 16.0),
                                 ),
