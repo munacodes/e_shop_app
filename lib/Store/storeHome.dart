@@ -94,66 +94,64 @@ class _StoreHomeState extends State<StoreHome> {
         ],
       ),
       drawer: const MyDrawer(),
+      // body: CustomScrollView(
+      //   slivers: [
+      //     SliverToBoxAdapter(
+      //       child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      //         stream: FirebaseFirestore.instance
+      //             .collection('posts')
+      //             .orderBy("id", descending: true)
+      //             .snapshots(),
+      //         builder: (BuildContext context, dataSnapshot) {
+      //           return !dataSnapshot.hasData
+      //               ? const Center(
+      //                   child: CircularProgressIndicator(),
+      //                 )
+      //               : ListView.builder(
+      //                   itemCount: dataSnapshot.data!.docs.length,
+      //                   itemBuilder: (context, index) {
+      //                     ItemModel model = ItemModel.fromJson(
+      //                         dataSnapshot.data!.docs[index].data());
+      //                     return sourceInfo(model, context);
+      //                   },
+      //                 );
+      //         },
+      //       ),
+      //     ),
+      //   ],
+      // ),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
             SliverPersistentHeader(pinned: true, delegate: SearchBoxDelegate()),
-            StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection('items')
-                  .limit(15)
-                  .orderBy('publishedDate', descending: true)
-                  .snapshots(),
-              builder: (context, dataSnapshot) {
-                return dataSnapshot.hasData
-                    ? const SliverToBoxAdapter(
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      )
-                    :
-                    // : ListView.builder(
-                    //     itemCount: dataSnapshot.data!.docs.length,
-                    //     itemBuilder: (context, index) {
-                    //       ItemModel model = ItemModel.fromJson(
-                    //           dataSnapshot.data!.docs[index].data());
-                    //       return sourceInfo(model, context);
-                    //     },
-                    //   );
-
-                    GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 1,
-                        ),
-                        itemCount: dataSnapshot.data!.docs.length,
-                        itemBuilder: (context, index) {
-                          ItemModel model = ItemModel.fromJson(
-                              dataSnapshot.data!.docs[index].data());
-                          return sourceInfo(model, context);
-                        },
-                      );
-
-                // : StaggeredGrid.count(
-                //     crossAxisCount: 1,
-                //     mainAxisSpacing: 4.0,
-                //     crossAxisSpacing: 4.0,
-                //     children: [
-                // StaggeredGridTile.fit(
-                //   crossAxisCellCount: 1,
-                //   child: dataSnapshot.data!.docs[Index].data(),
-                // ),
-                // StaggeredGridTile.fit(
-                //   crossAxisCellCount: 1,
-                //   child: dataSnapshot.data!.docs[Index].data(),
-                // ),
-                // StaggeredGridTile.fit(
-                //   crossAxisCellCount: 1,
-                //   child: dataSnapshot.data!.docs[Index].data(),
-                // ),
-                //   ],
-                // );
-              },
+            SliverToBoxAdapter(
+              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection('items')
+                    .limit(15)
+                    .orderBy('publishedDate', descending: true)
+                    .snapshots(),
+                builder: (context, dataSnapshot) {
+                  return !dataSnapshot.hasData
+                      ? const SliverToBoxAdapter(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 1,
+                          ),
+                          itemCount: dataSnapshot.data!.docs.length,
+                          itemBuilder: (context, index) {
+                            ItemModel model = ItemModel.fromJson(
+                                dataSnapshot.data!.docs[index].data());
+                            return sourceInfo(model, context);
+                          },
+                        );
+                },
+              ),
             ),
           ],
         ),

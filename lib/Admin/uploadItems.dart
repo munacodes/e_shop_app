@@ -4,6 +4,7 @@ import 'package:e_shop_app/Admin/adminExports.dart';
 import 'package:e_shop_app/Widgets/widgetsExports.dart';
 import 'package:e_shop_app/home.dart';
 import 'package:e_shop_app/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -34,7 +35,8 @@ class _UploadPageState extends State<UploadPage>
 
   @override
   Widget build(BuildContext context) {
-    return file == null
+    super.build(context);
+    return _imageFile == null
         ? displayAdminHomeScreen()
         : displayAdminUploadFormScreen();
   }
@@ -129,48 +131,9 @@ class _UploadPageState extends State<UploadPage>
     );
   }
 
-  //  takeImage(mcontext) {
-  //   return showDialog(
-  //       context: mcontext,
-  //       builder: (con) {
-  //         return SimpleDialog(
-  //           title: const Text(
-  //             'Item Image',
-  //             style:
-  //                 TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-  //           ),
-  //           children: [
-  //             SimpleDialogOption(
-  //               onPressed: capturePhotoWithCamera(),
-  //               child: const Text(
-  //                 'Capture with Camera',
-  //                 style: TextStyle(color: Colors.green),
-  //               ),
-  //             ),
-  //             SimpleDialogOption(
-  //               onPressed: pickPhotoFromGallery(),
-  //               child: const Text(
-  //                 'Select from Gallery',
-  //                 style: TextStyle(color: Colors.green),
-  //               ),
-  //             ),
-  //             SimpleDialogOption(
-  //               onPressed: () {
-  //                 Navigator.pop(context);
-  //               },
-  //               child: const Text(
-  //                 'Cancel',
-  //                 style: TextStyle(color: Colors.green),
-  //               ),
-  //             ),
-  //           ],
-  //         );
-  //       });
-  // }
-
   takeImage(mcontext) {
     return showDialog<void>(
-      context: context,
+      context: mcontext,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -216,24 +179,23 @@ class _UploadPageState extends State<UploadPage>
     );
   }
 
-  File? file;
-  capturePhotoWithCamera() async {
+  File? _imageFile;
+  Future<void> capturePhotoWithCamera() async {
     Navigator.pop(context);
     final picker = ImagePicker();
-    final XFile? imageFile = await picker.pickImage(
+    final image = await picker.pickImage(
         source: ImageSource.camera, maxHeight: 600.0, maxWidth: 970.0);
     setState(() {
-      file = File(imageFile!.path);
+      _imageFile = File(image!.path);
     });
   }
 
   pickPhotoFromGallery() async {
     Navigator.pop(context);
     final picker = ImagePicker();
-    final XFile? imageFile =
-        await picker.pickImage(source: ImageSource.gallery);
+    final image = await picker.pickImage(source: ImageSource.gallery);
     setState(() {
-      file = File(imageFile!.path);
+      _imageFile = File(image!.path);
     });
   }
 
@@ -252,7 +214,15 @@ class _UploadPageState extends State<UploadPage>
           ),
         ),
         leading: IconButton(
-            onPressed: clearFormInfo(), icon: const Icon(Icons.arrow_back)),
+            onPressed: () {
+              clearFormInfo();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const AdminSignInPage(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.arrow_back)),
         title: const Text(
           'New Product',
           style: TextStyle(
@@ -260,15 +230,15 @@ class _UploadPageState extends State<UploadPage>
         ),
         actions: [
           TextButton(
-              onPressed:
-                  uploading ? null : () => uploadingImageAndSaveItemInfo(),
-              child: const Text(
-                'Add',
-                style: TextStyle(
-                    color: Colors.pink,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold),
-              )),
+            onPressed: uploading ? null : () => uploadImageAndSaveItemInfo(),
+            child: const Text(
+              'Add',
+              style: TextStyle(
+                  color: Colors.pink,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
         ],
       ),
       body: SafeArea(
@@ -278,73 +248,71 @@ class _UploadPageState extends State<UploadPage>
             Container(
               height: 230.0,
               width: MediaQuery.of(context).size.width * 0.8,
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: FileImage(file!), fit: BoxFit.cover)),
-              child: const AspectRatio(aspectRatio: 16 / 9),
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: FileImage(_imageFile!), fit: BoxFit.cover),
+                    ),
+                  ),
+                ),
+              ),
             ),
-            const Padding(padding: EdgeInsets.only(top: 12.0)),
-            ListTile(
-              leading:
-                  const Icon(Icons.perm_device_information, color: Colors.pink),
-              title: Container(
-                width: 250.0,
-                child: TextField(
-                  style: const TextStyle(color: Colors.deepPurpleAccent),
-                  controller: _shortInfoTextEditingController,
-                  decoration: const InputDecoration(
-                      hintText: 'Short Info',
-                      hintStyle: TextStyle(color: Colors.deepPurpleAccent),
-                      border: InputBorder.none),
+            const Padding(padding: EdgeInsets.only(top: 15.0)),
+            Container(
+              width: 250.0,
+              child: TextField(
+                controller: _shortInfoTextEditingController,
+                decoration: const InputDecoration(
+                  hintText: 'Short Info',
+                  hintStyle: TextStyle(color: Colors.deepPurpleAccent),
+                  border: InputBorder.none,
+                  prefixIcon:
+                      Icon(Icons.perm_device_information, color: Colors.pink),
                 ),
               ),
             ),
             const Divider(color: Colors.pink),
-            ListTile(
-              leading:
-                  const Icon(Icons.perm_device_information, color: Colors.pink),
-              title: Container(
-                width: 250.0,
-                child: TextField(
-                  style: const TextStyle(color: Colors.deepPurpleAccent),
-                  controller: _titleTextEditingController,
-                  decoration: const InputDecoration(
-                      hintText: 'Title',
-                      hintStyle: TextStyle(color: Colors.deepPurpleAccent),
-                      border: InputBorder.none),
+            Container(
+              width: 250.0,
+              child: TextField(
+                controller: _titleTextEditingController,
+                decoration: const InputDecoration(
+                  hintText: 'Title',
+                  hintStyle: TextStyle(color: Colors.deepPurpleAccent),
+                  border: InputBorder.none,
+                  prefixIcon:
+                      Icon(Icons.perm_device_information, color: Colors.pink),
                 ),
               ),
             ),
             const Divider(color: Colors.pink),
-            ListTile(
-              leading:
-                  const Icon(Icons.perm_device_information, color: Colors.pink),
-              title: Container(
-                width: 250.0,
-                child: TextField(
-                  style: const TextStyle(color: Colors.deepPurpleAccent),
-                  controller: _descriptionTextEditingController,
-                  decoration: const InputDecoration(
-                      hintText: 'Description',
-                      hintStyle: TextStyle(color: Colors.deepPurpleAccent),
-                      border: InputBorder.none),
+            Container(
+              width: 250.0,
+              child: TextField(
+                controller: _descriptionTextEditingController,
+                decoration: const InputDecoration(
+                  hintText: 'Description',
+                  hintStyle: TextStyle(color: Colors.deepPurpleAccent),
+                  border: InputBorder.none,
+                  prefixIcon:
+                      Icon(Icons.perm_device_information, color: Colors.pink),
                 ),
               ),
             ),
             const Divider(color: Colors.pink),
-            ListTile(
-              leading:
-                  const Icon(Icons.perm_device_information, color: Colors.pink),
-              title: Container(
-                width: 250.0,
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.deepPurpleAccent),
-                  controller: _priceTextEditingController,
-                  decoration: const InputDecoration(
-                      hintText: 'Price',
-                      hintStyle: TextStyle(color: Colors.deepPurpleAccent),
-                      border: InputBorder.none),
+            Container(
+              width: 250.0,
+              child: TextField(
+                controller: _priceTextEditingController,
+                decoration: const InputDecoration(
+                  hintText: 'Price',
+                  hintStyle: TextStyle(color: Colors.deepPurpleAccent),
+                  border: InputBorder.none,
+                  prefixIcon:
+                      Icon(Icons.perm_device_information, color: Colors.pink),
                 ),
               ),
             ),
@@ -357,7 +325,7 @@ class _UploadPageState extends State<UploadPage>
 
   clearFormInfo() {
     setState(() {
-      file = null;
+      _imageFile == null;
       _descriptionTextEditingController.clear();
       _priceTextEditingController.clear();
       _shortInfoTextEditingController.clear();
@@ -365,12 +333,11 @@ class _UploadPageState extends State<UploadPage>
     });
   }
 
-  uploadingImageAndSaveItemInfo() async {
+  uploadImageAndSaveItemInfo() async {
     setState(() {
       uploading = true;
     });
-    String imageDownloadUrl = await uploadItemImage(file!);
-
+    String imageDownloadUrl = await uploadItemImage(_imageFile!);
     saveItemInfo(imageDownloadUrl);
   }
 
@@ -389,7 +356,7 @@ class _UploadPageState extends State<UploadPage>
     itemRef.doc(productId).set({
       'shortInfo': _shortInfoTextEditingController.text.trim(),
       'longDescription': _descriptionTextEditingController.text.trim(),
-      'price': int.parse(_priceTextEditingController.text),
+      'price': _priceTextEditingController.text.trim(),
       'publishedDate': DateTime.now(),
       'status': 'avaliable',
       'thumbnailUrl': downloadUrl,
@@ -397,7 +364,7 @@ class _UploadPageState extends State<UploadPage>
     });
 
     setState(() {
-      file = null;
+      _imageFile == null;
       uploading = false;
       productId = DateTime.now().millisecondsSinceEpoch.toString();
       _descriptionTextEditingController.clear();
@@ -406,4 +373,27 @@ class _UploadPageState extends State<UploadPage>
       _priceTextEditingController.clear();
     });
   }
+
+  // saveItemInfo(String downloadUrl) async {
+  //   User? user = FirebaseAuth.instance.currentUser;
+  //   await FirebaseFirestore.instance.collection('items').doc(user!.uid).set({
+  //     'shortInfo': _shortInfoTextEditingController.text.trim(),
+  //     'longDescription': _descriptionTextEditingController.text.trim(),
+  //     'price': _priceTextEditingController.text.trim(),
+  //     'publishedDate': DateTime.now(),
+  //     'status': 'avaliable',
+  //     'thumbnailUrl': downloadUrl,
+  //     'title': _titleTextEditingController.text.trim(),
+  //   });
+
+  //   setState(() {
+  //     _imageFile == null;
+  //     uploading = false;
+  //     productId = DateTime.now().millisecondsSinceEpoch.toString();
+  //     _descriptionTextEditingController.clear();
+  //     _titleTextEditingController.clear();
+  //     _shortInfoTextEditingController.clear();
+  //     _priceTextEditingController.clear();
+  //   });
+  // }
 }
