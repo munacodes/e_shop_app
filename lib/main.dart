@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => CartItemCounter()),
+        ChangeNotifierProvider(create: (context) => ItemQuantity()),
         ChangeNotifierProvider(create: (context) => AddressChanger()),
         ChangeNotifierProvider(create: (context) => TotalAmount()),
       ],

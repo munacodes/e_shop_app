@@ -71,7 +71,8 @@ class _ProductPageState extends State<ProductPage> {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Center(
                       child: InkWell(
-                        onTap: () => print('Clicked'),
+                        onTap: () => checkItemInCart(
+                            widget.itemModel.shortInfo!, context),
                         child: Container(
                           decoration: const BoxDecoration(
                             gradient: LinearGradient(

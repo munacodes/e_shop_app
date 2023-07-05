@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
       () async {
         if (EcommerceApp.auth!.currentUser != null) {
           Route route = MaterialPageRoute(
-            builder: (_) => StoreHome(),
+            builder: (_) => const StoreHome(),
           );
           Navigator.pushReplacement(context, route);
         } else {

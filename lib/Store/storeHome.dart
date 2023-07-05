@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_shop_app/Admin/adminExports.dart';
 import 'package:e_shop_app/Store/storeExports.dart';
 import 'package:e_shop_app/Counters/countersExports.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -94,67 +95,65 @@ class _StoreHomeState extends State<StoreHome> {
         ],
       ),
       drawer: const MyDrawer(),
-      // body: CustomScrollView(
-      //   slivers: [
-      //     SliverToBoxAdapter(
-      //       child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      //         stream: FirebaseFirestore.instance
-      //             .collection('posts')
-      //             .orderBy("id", descending: true)
-      //             .snapshots(),
-      //         builder: (BuildContext context, dataSnapshot) {
-      //           return !dataSnapshot.hasData
-      //               ? const Center(
-      //                   child: CircularProgressIndicator(),
-      //                 )
-      //               : ListView.builder(
-      //                   itemCount: dataSnapshot.data!.docs.length,
-      //                   itemBuilder: (context, index) {
-      //                     ItemModel model = ItemModel.fromJson(
-      //                         dataSnapshot.data!.docs[index].data());
-      //                     return sourceInfo(model, context);
-      //                   },
-      //                 );
-      //         },
-      //       ),
-      //     ),
-      //   ],
-      // ),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverPersistentHeader(pinned: true, delegate: SearchBoxDelegate()),
-            SliverToBoxAdapter(
-              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: FirebaseFirestore.instance
-                    .collection('items')
-                    .limit(15)
-                    .orderBy('publishedDate', descending: true)
-                    .snapshots(),
-                builder: (context, dataSnapshot) {
-                  return !dataSnapshot.hasData
-                      ? const SliverToBoxAdapter(
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      : GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 1,
-                          ),
-                          itemCount: dataSnapshot.data!.docs.length,
-                          itemBuilder: (context, index) {
-                            ItemModel model = ItemModel.fromJson(
-                                dataSnapshot.data!.docs[index].data());
-                            return sourceInfo(model, context);
-                          },
-                        );
-                },
-              ),
-            ),
-          ],
-        ),
+      body: CustomScrollView(
+        slivers: [
+          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: FirebaseFirestore.instance
+                .collection('posts')
+                .orderBy("id", descending: true)
+                .snapshots(),
+            builder: (BuildContext context, dataSnapshot) {
+              return !dataSnapshot.hasData
+                  ? const SliverToBoxAdapter(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : StaggeredGrid.count(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 4,
+                      crossAxisSpacing: 4,
+                      children: [
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 2,
+                          mainAxisCellCount: 2,
+                          child: ItemModel.fromJson(thumbnailUrl),
+                        ),
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 2,
+                          mainAxisCellCount: 1,
+                          child: ItemModel.fromJson(title),
+                        ),
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 1,
+                          mainAxisCellCount: 1,
+                          child: User.title,
+                        ),
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 1,
+                          mainAxisCellCount: 1,
+                          child: Tile(index: 3),
+                        ),
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 4,
+                          mainAxisCellCount: 2,
+                          child: Tile(index: 4),
+                        ),
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 4,
+                          mainAxisCellCount: 2,
+                          child: Tile(index: 5),
+                        ),
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: 4,
+                          mainAxisCellCount: 2,
+                          child: Tile(index: 6),
+                        ),
+                      ],
+                    );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -297,7 +296,25 @@ Widget sourceInfo(ItemModel model, BuildContext context,
                     child: Container(),
                   ),
 
-                  // TODO: Implement the cart item remove features
+                  // Implement the cart item remove features
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: removeCartFunction == null
+                        ? IconButton(
+                            onPressed: () {
+                              checkItemInCart(model.shortInfo!, context);
+                            },
+                            icon: const Icon(Icons.add_shopping_cart,
+                                color: Colors.pinkAccent))
+                        : IconButton(
+                            onPressed: () {},
+                            icon: const Icon(Icons.delete,
+                                color: Colors.pinkAccent)),
+                  ),
+                  const Divider(
+                    height: 25.0,
+                    color: Colors.pink,
+                  ),
                 ],
               ),
             )
@@ -312,4 +329,29 @@ Widget card({Color primaryColor = Colors.redAccent, String? imgPath}) {
   return Container();
 }
 
-void checkItemInCart(String productID, BuildContext context) {}
+void checkItemInCart(String shortInfoAsID, BuildContext context) {
+  EcommerceApp.sharedPreferences!
+          .getStringList(EcommerceApp.userCartList)!
+          .contains(shortInfoAsID)
+      ? Fluttertoast.showToast(msg: 'Item is already in Cart')
+      : addItemToCart(shortInfoAsID, context);
+}
+
+addItemToCart(String shortInfoAsID, BuildContext context) {
+  List<String> tempCartList =
+      EcommerceApp.sharedPreferences!.getStringList(EcommerceApp.userCartList)!;
+  tempCartList.add(shortInfoAsID);
+
+  EcommerceApp.firestore!
+      .collection(EcommerceApp.collectionUser)
+      .doc(EcommerceApp.sharedPreferences!.getString(EcommerceApp.userUID))
+      .update({
+    EcommerceApp.userCartList: tempCartList,
+  }).then((v) {
+    Fluttertoast.showToast(msg: 'Item Added To Cart Successfully');
+    EcommerceApp.sharedPreferences!
+        .setStringList(EcommerceApp.userCartList, tempCartList);
+
+    Provider.of<CartItemCounter>(context, listen: false).displayResult();
+  });
+}
